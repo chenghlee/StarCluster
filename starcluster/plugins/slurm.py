@@ -319,8 +319,13 @@ class SlurmPlugin(clustersetup.DefaultClusterSetup):
                 "scontrol update nodename=" + new_node.alias + " state=idle",
                 raise_on_failure=True)
         except self.remote_exceptions, e:
-            raise SlurmControllerError(
-                "Unable to update node state: " + str(e))
+            # TODO: Remove this once SLURM supports node transitions from
+            # FUTURE to IDLE.
+            try:
+                self._restart_slurm(master)
+            except self.remote_exceptions, e:
+                raise SlurmControllerError(
+                    "Unable to update node state: " + str(e))
 
     def _force_restart_slurm(self, master):
         """
