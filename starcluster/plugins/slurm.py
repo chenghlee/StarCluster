@@ -231,7 +231,7 @@ class SlurmPlugin(clustersetup.DefaultClusterSetup):
         for x in fake_nodes:
             new_hosts_file += self.fake_node_ip + " " + x + "\n"
         if removed_node:
-            new_hosts_file += self.fake_node_ip + " " + removed_node.alias
+            new_hosts_file += self.fake_node_ip + " " + removed_node.alias + "\n"
         log.debug("Writing new hosts file:" + new_hosts_file)
         self.fake_nodes = fake_nodes
         try:

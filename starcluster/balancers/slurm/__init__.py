@@ -480,12 +480,13 @@ class NodeParserStateMachine(object):
         return self.nodes
 
 
-class SlurmJob(object):
+class SlurmJob(dict):
     """
     Class representing a SLURM job
     """
     def __init__(self, **kwargs):
-        self.update(**kwargs)
+        dict.__init__(self, **kwargs)
+        self.__init = True
 
     def __repr__(self):
         return "<SlurmJob: %6s User: %10s Submit: %s Start: %s End: %s>" % \
@@ -502,7 +503,18 @@ class SlurmJob(object):
         """
         # Note that if this gets called, getting attributes failed
         # to find the desired attribute in any of the normal places
-        return 'N/A'
+        try:
+            return self.__getitem__(name)
+        except KeyError:
+            return 'N/A'
+
+    def __setattr__(self, key, value):
+        if not '_SlurmJob__init' in self.__dict__:
+            return dict.__setattr__(self, key, value)
+        elif key in self:
+            dict.__setattr__(self, key, value)
+        else:
+            self.__setitem__(key, value)
 
     def get_node_list(self):
         parser = NodeParserStateMachine()
@@ -512,11 +524,7 @@ class SlurmJob(object):
         """
         Updates a job's attributes
         """
-        for k in kwargs:
-            if isinstance(kwargs[k], str):
-                setattr(self, k, kwargs[k].lower())
-            else:
-                setattr(self, k, kwargs[k])
+        self.__dict__.update(**kwargs)
 
 
 class SlurmState(object):
@@ -907,7 +915,7 @@ class SlurmState(object):
         """
         log.debug("Setting running jobs list")
         self._running_jobs = filter(
-            lambda job: job.jobstate == 'running', self.queued_jobs)
+            lambda job: job.state == 'running', self.queued_jobs)
         if self._running_jobs is None:
             self._running_jobs = []
 
@@ -917,7 +925,7 @@ class SlurmState(object):
         """
         log.debug("Setting pending jobs list")
         self._pending_jobs = filter(
-            lambda job: job.jobstate == 'pending', self.queued_jobs)
+            lambda job: job.state == 'pending', self.queued_jobs)
         if self._pending_jobs is None:
             self._pending_jobs = []
 
