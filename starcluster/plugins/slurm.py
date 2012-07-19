@@ -307,11 +307,11 @@ class SlurmPlugin(clustersetup.DefaultClusterSetup):
         for node in nodes:
             self._configure_slurm_node(node)
 
-        # Restart SLURM
-        self._restart_slurm(master)
-
         # Disable fake nodes in SLURM
         self._disable_fake_nodes(master)
+
+        # Restart SLURM
+        self._restart_slurm(master)
 
         # Set the new node's status to IDLE
         try:
