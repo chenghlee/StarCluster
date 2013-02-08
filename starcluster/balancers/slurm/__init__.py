@@ -12,7 +12,7 @@ from starcluster.balancers import LoadBalancer
 from starcluster.utils import print_timing
 from starcluster.utils import iso_to_datetime_tuple
 from starcluster.exception import SSHError
-from ssh import SFTPError
+from paramiko import SFTPError
 
 
 class SlurmLoadBalancer(LoadBalancer):

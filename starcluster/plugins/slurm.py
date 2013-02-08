@@ -5,7 +5,7 @@ See: http://computing.llnl.gov/linux/slurm/
 
 """
 import starcluster
-from ssh import SFTPError
+from paramiko import SFTPError
 from starcluster import clustersetup
 from starcluster.templates import slurm
 from starcluster.logger import log
