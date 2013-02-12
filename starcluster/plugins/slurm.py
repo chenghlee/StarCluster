@@ -21,7 +21,7 @@ class SlurmPlugin(clustersetup.DefaultClusterSetup):
 
     # Packages needed by the SLURM controller
     slurm_master_packages = [
-                              "libmysqlclient16",
+                              "libmysqlclient18",
                               "mysql-server",
                               "slurm-llnl-slurmdbd",
                               "slurm-llnl",
