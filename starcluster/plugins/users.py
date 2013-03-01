@@ -16,8 +16,8 @@ class CreateUsers(clustersetup.DefaultClusterSetup):
     DOWNLOAD_KEYS_DIR = os.path.join(static.STARCLUSTER_CFG_DIR, 'user_keys')
     BATCH_USER_FILE = "/root/.users/users.txt"
 
-    def __init__(self, num_users=None, usernames=None, download_keys=None,
-                 download_keys_dir=None):
+    def __init__(self, num_users=None, usernames=None, ssh_pubkeys=None,
+                 download_keys=None, download_keys_dir=None):
         if usernames:
             usernames = [user.strip() for user in usernames.split(',')]
         if num_users:
@@ -40,6 +40,17 @@ class CreateUsers(clustersetup.DefaultClusterSetup):
         self._usernames = usernames
         self._download_keys = str(download_keys).lower() == "true"
         self._download_keys_dir = download_keys_dir or self.DOWNLOAD_KEYS_DIR
+        self._user_keys = {}
+        if ssh_pubkeys:
+            try:
+                keyfile = open(ssh_pubkeys)
+                for line in keyfile:
+                    parts = line.strip().split(' ')
+                    if parts[0] in self._usernames:
+                        self._user_keys[parts[0]] = ' '.join(parts[1:])
+                keyfile.close()
+            except IOError as err:
+                raise exception.BaseException(str(err))
         super(CreateUsers, self).__init__()
 
     def run(self, nodes, master, user, user_shell, volumes):
@@ -69,6 +80,15 @@ class CreateUsers(clustersetup.DefaultClusterSetup):
         self._setup_scratch(nodes, self._usernames)
         if self._download_keys:
             self._download_user_keys(master, self._usernames)
+        for username in self._usernames:
+            if username in self._user_keys:
+                log.info("Adding authorized key for user '%s'" % username)
+                user = master.getpwnam(username)
+                ssh_folder = posixpath.join(user.pw_dir, '.ssh')
+                authkeys_path = posixpath.join(ssh_folder, 'authorized_keys')
+                authkeys = master.ssh.remote_file(authkeys_path, 'a')
+                authkeys.write('%s\n' % self._user_keys[username])
+                authkeys.close()
 
     def _download_user_keys(self, master, usernames):
         pardir = posixpath.dirname(self.BATCH_USER_FILE)
