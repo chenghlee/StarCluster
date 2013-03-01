@@ -49,7 +49,7 @@ class CreateUsers(clustersetup.DefaultClusterSetup):
                     if parts[0] in self._usernames:
                         self._user_keys[parts[0]] = ' '.join(parts[1:])
                 keyfile.close()
-            except IOError as e:
+            except IOError as err:
                 raise exception.BaseException(str(err))
         super(CreateUsers, self).__init__()
 
