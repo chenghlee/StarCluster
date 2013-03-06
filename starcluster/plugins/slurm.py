@@ -630,6 +630,10 @@ class SlurmPlugin(clustersetup.DefaultClusterSetup):
         """
         log.debug(node.alias + ": installing SLURM.")
 
+        # Make sure we're using latest versions of these packages
+        log.info(node.alias + ": updating apt cache.")
+        node.apt_command('update')
+
         # Install all necessary packages
         for package in self.slurm_packages:
             node.apt_install(package)
@@ -681,6 +685,10 @@ class SlurmPlugin(clustersetup.DefaultClusterSetup):
             raise RemoteCommandError("Unable to open file: " + \
                 self.packages_installed_file + ": " + str(e))
         log_file.write("# SLURM Plugin installed packages:\n")
+
+        # Make sure we're using latest versions of these packages
+        log.info(master.alias + ": updating apt cache.")
+        master.apt_command('update')
 
         # Install the packages
         for package in self.slurm_master_packages + self.slurm_packages:
